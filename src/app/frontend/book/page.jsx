@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -15,7 +15,20 @@ export default function Book() {
   const [contact, setContact] = useState("");
   const [errors, setErrors] = useState({});
   const [unavailableSlots, setUnavailableSlots] = useState([]);
+  const [minDate, setMinDate] = useState("");
+  const [maxDate, setMaxDate] = useState("");
 
+  // Generate min and max dates for the date input
+  useEffect(() => {
+    const today = new Date();
+    const sixMonthsFromToday = new Date();
+    sixMonthsFromToday.setMonth(today.getMonth() + 6);
+
+    setMinDate(today.toISOString().split("T")[0]);
+    setMaxDate(sixMonthsFromToday.toISOString().split("T")[0]);
+  }, []);
+
+  // Generate 15 time slots dynamically
   const generateTimeSlots = () => {
     const slots = [];
     let hour = 12;
@@ -34,12 +47,13 @@ export default function Book() {
     return slots;
   };
 
+  // Fetch unavailable slots for the selected date
   const handleDateChange = async (e) => {
     const selected = e.target.value;
     setSelectedDate(selected);
     setTimeSlots(generateTimeSlots());
     setSelectedSlot(null);
-  
+
     try {
       const response = await axios.get(
         `http://localhost:5000/api/check-availability?date=${selected}`
@@ -49,8 +63,8 @@ export default function Book() {
       console.error("Error fetching unavailable slots:", error);
     }
   };
-  
 
+  // Handle slot selection
   const handleSlotClick = (slot) => {
     if (unavailableSlots.includes(slot)) {
       alert("The selected slot is already booked. Please choose another.");
@@ -75,6 +89,7 @@ export default function Book() {
     return Object.keys(validationErrors).length === 0;
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -91,7 +106,7 @@ export default function Book() {
       await axios.post("http://localhost:5000/api/bookings", bookingDetails);
 
       router.push(
-        `frontend/summary?date=${selectedDate}&time=${selectedSlot}&guests=${guestCount}&name=${name}&contact=${contact}`
+        `/frontend/summary?date=${selectedDate}&time=${selectedSlot}&guests=${guestCount}&name=${name}&contact=${contact}`
       );
     } catch (error) {
       alert(error.response?.data?.message || "An error occurred.");
@@ -109,6 +124,8 @@ export default function Book() {
             type="date"
             onChange={handleDateChange}
             value={selectedDate || ""}
+            min={minDate}
+            max={maxDate}
             className="w-full border rounded px-4 py-2 text-black focus:ring focus:ring-yellow-500"
           />
           {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
@@ -124,17 +141,14 @@ export default function Book() {
                 <button
                   key={index}
                   type="button"
-                  className={`py-2 rounded ${unavailableSlots.includes(slot)
+                  className={`py-2 rounded ${
+                    unavailableSlots.includes(slot)
                       ? "bg-red-500 text-white cursor-not-allowed"
                       : selectedSlot === slot
-                        ? "bg-green-800 text-white"
-                        : "bg-green-500 text-white hover:bg-green-600"
-                    }`}
-                  onClick={() =>
-                    unavailableSlots.includes(slot)
-                      ? alert("The selected slot is unavailable. Please choose another.")
-                      : setSelectedSlot(slot)
-                  }
+                      ? "bg-green-800 text-white"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  }`}
+                  onClick={() => handleSlotClick(slot)}
                   disabled={unavailableSlots.includes(slot)} // Disable unavailable slots
                 >
                   {slot}
