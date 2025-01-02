@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const morgan = require('morgan'); // Logging middleware
+const morgan = require('morgan');
 
 // Initialize Express App
 const app = express();
-const PORT = process.env.PORT || 5000; // Use environment variable or fallback to 5000
+const PORT = process.env.PORT || 5000;
 
 // In-memory storage for bookings (temporary, for demonstration)
 const bookings = [];
@@ -21,6 +21,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`Blocked by CORS: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -38,18 +39,16 @@ app.get('/api/check-availability', (req, res) => {
     return res.status(400).json({ message: 'Date is required.' });
   }
 
-  if (time) {
-    const isBooked = bookings.some(
-      (booking) => booking.date === date && booking.time === time
-    );
-    return res.status(200).json({ available: !isBooked });
-  } else {
-    const unavailableSlots = bookings
-      .filter((booking) => booking.date === date)
-      .map((booking) => booking.time);
+  const unavailableSlots = bookings
+    .filter((booking) => booking.date === date)
+    .map((booking) => booking.time);
 
-    return res.status(200).json({ unavailableSlots });
+  if (time) {
+    const isBooked = unavailableSlots.includes(time);
+    return res.status(200).json({ available: !isBooked });
   }
+
+  return res.status(200).json({ unavailableSlots });
 });
 
 // Add a new booking
@@ -103,6 +102,15 @@ app.delete('/api/bookings/:id', (req, res) => {
 // Handle undefined routes
 app.use((req, res) => {
   res.status(404).json({ message: 'Endpoint not found.' });
+});
+
+// Centralized Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(`Error: ${err.message}`);
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'CORS error: You are not allowed to access this resource.' });
+  }
+  res.status(500).json({ message: 'An internal server error occurred.' });
 });
 
 // Start the server
