@@ -56,7 +56,7 @@ export default function Book() {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/check-availability?date=${selected}`
+        `https://restaurant-booking-loqu.vercel.app/api/check-availability?date=${selected}`
       );
       setUnavailableSlots(response.data.unavailableSlots || []);
     } catch (error) {
@@ -103,7 +103,7 @@ export default function Book() {
         contact,
       };
 
-      await axios.post("http://localhost:5000/api/bookings", bookingDetails);
+      await axios.post("https://restaurant-booking-loqu.vercel.app/api/bookings", bookingDetails);
 
       router.push(
         `/frontend/summary?date=${selectedDate}&time=${selectedSlot}&guests=${guestCount}&name=${name}&contact=${contact}`
