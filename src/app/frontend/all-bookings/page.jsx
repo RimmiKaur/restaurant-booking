@@ -16,7 +16,7 @@ export default function AllBookings() {
 
   const fetchBookings = async () => {
     try {
-      const response = await axios.get('https://restaurant-booking-loqu.vercel.app/api/bookings');
+      const response = await axios.get('https://restaurant-booking-yxt7.onrender.com/api/bookings');
       setBookings(response.data);
     } catch (err) {
       setError('Failed to fetch bookings.');
@@ -25,7 +25,7 @@ export default function AllBookings() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-booking-loqu.vercel.app/api/bookings/${id}`);
+      await axios.delete(`https://restaurant-booking-yxt7.onrender.com/api/bookings/${id}`);
       setBookings(bookings.filter((booking) => booking.id !== id)); 
       setSelectedBooking(null); 
     } catch (err) {

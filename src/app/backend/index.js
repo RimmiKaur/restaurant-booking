@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const morgan = require('morgan'); // Logging middleware
 
 // Initialize Express App
 const app = express();
@@ -11,12 +12,21 @@ const bookings = [];
 
 // Middleware
 app.use(cors({
-  origin: [
-    'https://restaurant-booking-loqu.vercel.app', // Frontend domain
-    'http://localhost:3000' // For local testing (optional)
-  ],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://restaurant-booking-loqu.vercel.app', // Frontend domain
+      'http://localhost:3000', // Local testing
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 }));
 app.use(bodyParser.json());
+app.use(morgan('dev')); // Logs all incoming requests
 
 // API Routes
 
@@ -29,14 +39,11 @@ app.get('/api/check-availability', (req, res) => {
   }
 
   if (time) {
-    // Check if a specific time slot is booked
     const isBooked = bookings.some(
       (booking) => booking.date === date && booking.time === time
     );
-
     return res.status(200).json({ available: !isBooked });
   } else {
-    // Get all unavailable slots for a date
     const unavailableSlots = bookings
       .filter((booking) => booking.date === date)
       .map((booking) => booking.time);
@@ -91,6 +98,11 @@ app.delete('/api/bookings/:id', (req, res) => {
 
   bookings.splice(bookingIndex, 1);
   return res.status(200).json({ message: 'Booking deleted successfully.' });
+});
+
+// Handle undefined routes
+app.use((req, res) => {
+  res.status(404).json({ message: 'Endpoint not found.' });
 });
 
 // Start the server
