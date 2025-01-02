@@ -18,7 +18,6 @@ export default function Book() {
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
 
-  // Generate min and max dates for the date input
   useEffect(() => {
     const today = new Date();
     const sixMonthsFromToday = new Date();
@@ -28,7 +27,6 @@ export default function Book() {
     setMaxDate(sixMonthsFromToday.toISOString().split("T")[0]);
   }, []);
 
-  // Generate 15 time slots dynamically
   const generateTimeSlots = () => {
     const slots = [];
     let hour = 12;
@@ -47,7 +45,6 @@ export default function Book() {
     return slots;
   };
 
-  // Fetch unavailable slots for the selected date
   const handleDateChange = async (e) => {
     const selected = e.target.value;
     setSelectedDate(selected);
@@ -64,7 +61,6 @@ export default function Book() {
     }
   };
 
-  // Handle slot selection
   const handleSlotClick = (slot) => {
     if (unavailableSlots.includes(slot)) {
       alert("The selected slot is already booked. Please choose another.");
@@ -73,7 +69,6 @@ export default function Book() {
     }
   };
 
-  // Validate the form
   const validateForm = () => {
     const validationErrors = {};
 
@@ -89,7 +84,6 @@ export default function Book() {
     return Object.keys(validationErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
