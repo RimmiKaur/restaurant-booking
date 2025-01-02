@@ -14,8 +14,8 @@ const bookings = [];
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
-      'https://restaurant-booking-loqu-ghuvlg11i.vercel.app', // New Frontend domain
-      'http://localhost:3000', // Local testing
+      'https://restaurant-booking-yghc.vercel.app', // Add the new frontend domain
+      'http://localhost:3000', // Allow local testing
     ];
 
     if (!origin || allowedOrigins.includes(origin)) {
@@ -26,6 +26,7 @@ app.use(cors({
     }
   },
 }));
+
 
 app.use(bodyParser.json());
 app.use(morgan('dev')); // Logs all incoming requests
