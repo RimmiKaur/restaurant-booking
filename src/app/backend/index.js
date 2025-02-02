@@ -6,6 +6,7 @@ const morgan = require('morgan');
 // Initialize Express App
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.use(cors());
 
 // In-memory storage for bookings (temporary, for demonstration)
 const bookings = [];
